@@ -1,20 +1,18 @@
 import fetchAirtableRecords from "../controllers/fetchAirtableRecrods";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Record } from "../types/records";
-import { useDebounce } from "../utils/utils";
 import "./filterRecords.css";
 
 const FilterRecords = () => {
   const [records, setRecords] = useState<Record[]>([]);
+  const [filteredRecords, setFilteredRecords] = useState<Record[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("");
 
-  const debouncedChange = useDebounce(() => {
-    fetchData();
-  }, 500);
-
   const fetchData = async () => {
+    if (!filter) return;
     try {
       setLoading(true);
       const base_id = import.meta.env.VITE_AIRTABLE_BASE_ID;
@@ -52,10 +50,17 @@ const FilterRecords = () => {
           record.fields["Quiz Title"] = quizRecord.fields.Title;
           record.fields["Quiz Short Title"] = quizRecord.fields["Short Title"];
           record.fields["Category"] = quizRecord.fields.Category;
+          setCategories(prev => {
+            if (!prev.includes(quizRecord.fields.Category)) {
+              return [...prev, quizRecord.fields.Category];
+            }
+            return prev;
+          });
         }
       });
 
       setRecords(questionRecords);
+      setFilteredRecords(questionRecords);
       setLoading(false);
     } catch (err) {
       setError("Failed to fetch records data");
@@ -65,45 +70,79 @@ const FilterRecords = () => {
     }
   };
 
+  //   Filter the records based on the selected category
+  const handleCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedCategory = event.target.value;
+    if (selectedCategory) {
+      const filteredRecords = records.filter(
+        record => record.fields.Category === selectedCategory
+      );
+      setFilteredRecords(filteredRecords);
+    } else {
+      // If no category is selected, reset to the original records
+      setFilteredRecords(records);
+    }
+  };
+
   if (error) return <div>{error}</div>;
 
   return (
     <div className="records">
       <h1>Select Question</h1>
       <form>
-        <label htmlFor="filter">Select Question:</label>
-        <input
-          type="text"
-          id="filter"
-          name="filter"
-          placeholder="Enter title to filter"
-          value={filter}
-          onChange={e => {
-            setFilter(e.target.value);
-            debouncedChange();
-          }}
-        />
+        <label htmlFor="filter" className="sr-only">
+          Select Question:
+        </label>
+        <div className="form-group">
+          <div className="input-wrap">
+            <input
+              type="text"
+              id="filter"
+              name="filter"
+              placeholder="Type a keyword to find a question or a quiz"
+              value={filter}
+              onChange={e => setFilter(e.target.value)}
+            />
+            <button type="button" onClick={fetchData} className="search-button">
+              Search
+            </button>
+          </div>
+          <div className="sub-filter">
+            <label htmlFor="category" className="sr-only">
+              Select Category:
+            </label>
+            <select
+              id="category"
+              name="category"
+              className="category-select"
+              onChange={handleCategoryChange}
+            >
+              <option value="">Category</option>
+              {categories.map((category, index) => (
+                <option key={index} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
       </form>
       {loading && <div>Loading...</div>}
-      {records.length > 0 && (
-        <table className="record-list">
-          <thead>
-            <tr>
-              <th>Question Title</th>
-              <th>Quiz</th>
-              <th>Category</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map(record => (
-              <tr key={record.id}>
-                <td>{record.fields.Title}</td>
-                <td>{record.fields["Quiz Title"]}</td>
-                <td>{record.fields.Category}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {filteredRecords.length > 0 && (
+        <div className="record-list">
+          <h2>Question Title</h2>
+          <h2>Quiz</h2>
+          <h2>Category</h2>
+          {filteredRecords.map(record => (
+            <Fragment key={record.id}>
+              <p>{record.fields.Title}</p>
+              <p>{record.fields["Quiz Title"]}</p>
+              <p>{record.fields.Category}</p>
+            </Fragment>
+          ))}
+        </div>
       )}
     </div>
   );
