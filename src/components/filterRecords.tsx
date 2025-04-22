@@ -58,7 +58,7 @@ const FilterRecords = () => {
       setRecords(questionRecords);
       setLoading(false);
     } catch (err) {
-      setError("Failed to fetch records");
+      setError("Failed to fetch records data");
       console.error(err);
     } finally {
       setLoading(false);
