@@ -1,0 +1,17 @@
+.records label {
+	margin-right: 12px;
+}
+
+.record-list {
+	width: 100%;
+	/* Evenly space the table cells in an html table element */
+	display: table;
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+.record-list th,
+.record-list td {
+	text-align: left;
+	padding: 8px;
+	border-bottom: 1px solid #ddd;
+}
