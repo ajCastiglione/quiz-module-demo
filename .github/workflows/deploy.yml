@@ -20,10 +20,10 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_AIRTABLE_API_KEY=${{ secrets.VITE_AIRTABLE_API_KEY }}
-          VITE_AIRTABLE_BASE_ID=${{ secrets.VITE_AIRTABLE_BASE_ID }}
-          VITE_AIRTABLE_TABLE_ID=${{ secrets.VITE_AIRTABLE_TABLE_ID }}
-          VITE_AIRTABLE_QUIZ_TABLE_ID=${{ secrets.VITE_AIRTABLE_QUIZ_TABLE_ID }}
+          VITE_AIRTABLE_API_KEY: ${{ secrets.VITE_AIRTABLE_API_KEY }}
+          VITE_AIRTABLE_BASE_ID: ${{ secrets.VITE_AIRTABLE_BASE_ID }}
+          VITE_AIRTABLE_TABLE_ID: ${{ secrets.VITE_AIRTABLE_TABLE_ID }}
+          VITE_AIRTABLE_QUIZ_TABLE_ID: ${{ secrets.VITE_AIRTABLE_QUIZ_TABLE_ID }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
